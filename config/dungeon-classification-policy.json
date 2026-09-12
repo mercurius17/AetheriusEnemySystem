@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "authority": "user decisions supplied in this task",
+  "manageAllActiveLoadOrderDungeons": true,
+  "discoveryAuthority": "houseCARL live MO2 winner records; no fixed plugin list or load-order index",
+  "requiredCoverage": "all vanilla, DLC, Creation Club, and mod-added locations identified as dungeons or hostile dungeon-like encounters",
+  "tiers": {
+    "EASY": { "minEnemyLevel": 1, "targetEnemyLevel": 8, "maxEnemyLevel": 15, "recommendedClassMin": 1, "recommendedClassMax": 10 },
+    "MEDIUM": { "minEnemyLevel": 15, "targetEnemyLevel": 22, "maxEnemyLevel": 30, "recommendedClassMin": 10, "recommendedClassMax": 20 },
+    "HARD": { "minEnemyLevel": 25, "targetEnemyLevel": 37, "maxEnemyLevel": 50, "recommendedClassMin": 20, "recommendedClassMax": 30 },
+    "VERY_HARD": { "minEnemyLevel": 40, "targetEnemyLevel": 70, "maxEnemyLevel": 100, "recommendedClassMin": 30, "recommendedClassMax": 40 }
+  },
+  "rules": [
+    "Dragon Priest present => VERY_HARD",
+    "predominantly vampire => VERY_HARD; other vampire dungeon => HARD",
+    "Dwemer dungeon => HARD",
+    "bandit lair => EASY or MEDIUM according to contained levels",
+    "draugr crypt => MEDIUM or HARD; VERY_HARD when a Dragon Priest is present",
+    "bear or sabre cat => MEDIUM",
+    "wolf, mudcrab, skeever, slaughterfish or horker-only den => EASY",
+    "ambiguous content => deterministic level evidence, then MEDIUM neutral fallback; never UNASSIGNED"
+  ],
+  "uniqueNpcPolicy": "BOSS_UNIQUE",
+  "serverHasQuests": false,
+  "spawnWeightAuthority": "original LVLN entry counts and paths",
+  "lootIntegration": {
+    "futureOwner": "AetheriusLootSystem",
+    "initialComposition": "source-defined loot",
+    "restoreTrigger": "new dungeon generation or reset only",
+    "sameGenerationRestore": false
+  }
+}

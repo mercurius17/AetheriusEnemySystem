@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "authorities": [
+    { "authorityId": "SKYRIM_REVAMPED", "nexusModId": 14598, "role": "GENERAL_BASE" },
+    { "authorityId": "LAWLESS", "nexusModId": 88080, "families": ["BANDIT"] },
+    { "authorityId": "THE_RESTLESS_DEAD", "nexusModId": 94100, "pluginFilename": "The Restless Dead.esp", "families": ["DRAUGR", "SKELETON"] },
+    { "authorityId": "BETTER_VAMPIRE_NPCS", "nexusModId": 9510, "families": ["VAMPIRE"] }
+  ],
+  "precedence": ["SKYRIM_REVAMPED", "THE_RESTLESS_DEAD", "LAWLESS", "BETTER_VAMPIRE_NPCS"]
+}

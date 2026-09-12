@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "mappings": [
+    {
+      "authorityId": "SKYRIM_REVAMPED",
+      "pluginFilename": "Skyrim Revamped - Complete Enemy Overhaul.esp",
+      "evidence": "houseCARL active load order epoch e2-ea986bad7b89dbe1"
+    },
+    {
+      "authorityId": "LAWLESS",
+      "pluginFilename": "Bandit War.esp",
+      "mo2ModFolder": "Lawless - A Bandit Overhaul",
+      "evidence": "MO2 VFS file provider plus houseCARL active-plugin verification, epoch e2-ea986bad7b89dbe1"
+    },
+    {
+      "authorityId": "THE_RESTLESS_DEAD",
+      "pluginFilename": "The Restless Dead.esp",
+      "mo2ModFolder": "The Restless Dead (A Draugr and Skeleton Overhaul)",
+      "nexusModId": 94100,
+      "evidence": "User-confirmed Nexus mod identity plus houseCARL active-plugin winner snapshots, epoch e2-ea986bad7b89dbe1"
+    },
+    {
+      "authorityId": "BETTER_VAMPIRE_NPCS",
+      "pluginFilename": "Better Vampire NPCs.esp",
+      "mo2ModFolder": "Better Vampire NPCs 2.3",
+      "evidence": "MO2 VFS file provider plus houseCARL active-plugin verification, epoch e2-ea986bad7b89dbe1"
+    }
+  ]
+}

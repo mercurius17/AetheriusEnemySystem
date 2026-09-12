@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Extensible evidence for dungeon mods that omit standard LCTN keywords; plugin positions are never stored.",
+  "includeDefiningPlugins": [
+    "HammetDungeon01.esm",
+    "HammetDungeon02.esm",
+    "Hammet's Dungeon Pack + North Keep Patch.esp"
+  ]
+}

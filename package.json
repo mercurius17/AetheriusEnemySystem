@@ -1,0 +1,29 @@
+{
+  "name": "aetherius-enemy-system",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Server-authoritative enemy and dungeon encounter contracts for Aetherius SkyMP.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mercurius17/AetheriusEnemySystem.git"
+  },
+  "homepage": "https://github.com/mercurius17/AetheriusEnemySystem#readme",
+  "bugs": {
+    "url": "https://github.com/mercurius17/AetheriusEnemySystem/issues"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/**/*.test.mjs",
+    "scan:plugins": "node scripts/scan-plugins.mjs",
+    "scan:enemies": "node scripts/build-enemy-registry.mjs",
+    "scan:lvln": "node scripts/analyze-lvln-reachability.mjs",
+    "scan:dungeons": "node scripts/scan-dungeons.mjs",
+    "prepare:dungeon-seeds": "node scripts/prepare-global-dungeon-seeds.mjs",
+    "import:housecarl": "node scripts/import-housecarl-snapshots.mjs",
+    "import:dungeons": "node scripts/import-global-dungeons.mjs",
+    "reports": "node scripts/generate-reports.mjs",
+    "readiness": "node scripts/validate-readiness.mjs",
+    "verify:boundary": "node scripts/verify-boundary.mjs"
+  }
+}

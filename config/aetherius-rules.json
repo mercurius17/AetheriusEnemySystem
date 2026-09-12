@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "enemyLevelRange": { "min": 1, "max": 100 },
+  "playerClassLevelRange": { "min": 1, "max": 40 },
+  "dungeonTiers": {
+    "EASY": { "min": 1, "max": 15 },
+    "MEDIUM": { "min": 15, "max": 30 },
+    "HARD": { "min": 25, "max": 50 },
+    "VERY_HARD": { "min": 40, "max": 100 }
+  },
+  "specialEnemyRules": {
+    "DRAGON_PRIEST": { "fixedCombatLevel": 100 }
+  }
+}
