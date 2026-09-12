@@ -138,6 +138,7 @@ Snapshots de uma modlist real ficam em `config/generated/` e não fazem parte do
 - [Arquitetura](docs/ARCHITECTURE.md)
 - [Integração com o sistema de classes/leveling](docs/INTEGRATION_CLASS_SYSTEM.md)
 - [Integração com o sistema de loot](docs/INTEGRATION_LOOT_SYSTEM.md)
+- [Integração de spawn, morte e ciclo das dungeons com o SkyMP](docs/SKYMP_RUNTIME_INTEGRATION.md)
 - [Política dos perfis MO2](docs/MO2_PROFILE_POLICY.md)
 - [Patches futuros do host](docs/PATCHES_REQUIRED.md)
 
