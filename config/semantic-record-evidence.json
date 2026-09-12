@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "source": "Exact resolved record EditorIDs observed in houseCARL epoch e2-8fae83455b0b4491; no runtime FormIDs",
+  "source": "Exact resolved record EditorIDs observed in houseCARL epochs e2-8fae83455b0b4491 and e2-de29c6df8a4a64e2; no runtime FormIDs",
   "raceEditorIds": {
     "BretonRaceChildVampire": "VAMPIRE",
     "BretonRaceVampire": "VAMPIRE",
@@ -23,6 +23,8 @@
     "SkeletonArmorRace": "SKELETON",
     "DLC1SoulCairnSkeletonArmorRace": "SKELETON",
     "DLC1SoulCairnSkeletonNecroRace": "SKELETON",
+    "IceWraithRace": "ICE_WRAITH",
+    "DLC2dunKarstaagIceWraithRace": "ICE_WRAITH",
     "AtronachFlameRace": "FLAME_ATRONACH",
     "AtronachStormRace": "STORM_ATRONACH",
     "DLC2DwarvenBallistaRace": "DWARVEN_BALLISTA",
@@ -46,6 +48,15 @@
   },
   "factionEditorIds": {
     "BanditFaction": "BANDIT",
-    "BanditFriendFaction": "BANDIT"
+    "BanditFriendFaction": "BANDIT",
+    "IceWraithFaction": "ICE_WRAITH",
+    "ThalmorFaction": "THALMOR",
+    "WEThalmorFaction": "THALMOR",
+    "WEThalmorPlayerEnemyFaction": "THALMOR",
+    "MQ201ThalmorEnemyFaction": "THALMOR",
+    "MQ201ThalmorCombatFaction": "THALMOR",
+    "MQ202ThalmorAgentFaction": "THALMOR",
+    "MGThalmorFaction": "THALMOR",
+    "MarkarthThalmorFaction": "THALMOR"
   }
 }

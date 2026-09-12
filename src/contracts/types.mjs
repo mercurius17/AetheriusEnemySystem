@@ -1,21 +1,68 @@
 export const CONTRACT_VERSION = 1;
+export const XP_CATEGORY_CONTRACT_VERSION = 1;
+export const XP_CATEGORY_PATTERN = /^[a-z0-9]+(?:_[a-z0-9]+)*$/;
 
-// Revalidated against ClassSystemAetherius/shared/bestiaryData.ts at the locked commit.
+// Default categories emitted without an injected Leveling contract. The list is
+// intentionally data-only: reward values remain owned by AetheriusLevelingSystem.
 export const BESTIARY_XP_CATEGORIES = Object.freeze([
   'bandit', 'riekling', 'silver_hand', 'reaver', 'forsworn', 'warlock',
-  'vampire', 'thalmor', 'skeleton', 'draugr', 'ghost', 'ash_spawn',
-  'dragon_priest', 'mudcrab', 'skeever', 'slaughterfish', 'wolf', 'horker',
+  'cultist', 'vampire', 'thalmor', 'skeleton', 'draugr', 'ghost', 'corrupted_shade',
+  'boneman', 'mistman', 'wrathman', 'ash_spawn',
+  'dragon_priest', 'ice_wraith', 'mudcrab', 'skeever', 'slaughterfish', 'wolf', 'horker',
   'frostbite_spider', 'sabre_cat', 'bear', 'death_hound', 'netch', 'mammoth',
-  'giant', 'troll', 'hagraven', 'chaurus', 'falmer', 'lurker', 'seeker',
+  'giant', 'troll', 'hagraven', 'chaurus', 'chaurus_hunter', 'falmer',
+  'spriggan', 'wispmother', 'wisp', 'gargoyle', 'ash_guardian', 'lurker', 'seeker',
   'dwarven_spider', 'dwarven_sphere', 'dwarven_ballista', 'dwarven_centurion',
   'flame_atronach', 'frost_atronach', 'storm_atronach', 'dremora', 'dragon'
 ]);
 
+export const BUILT_IN_ENEMY_FAMILIES = Object.freeze([
+  ...new Set([...BESTIARY_XP_CATEGORIES.map((category) => category.toUpperCase()), 'DWEMER'])
+]);
+
 export const ENEMY_FAMILIES = Object.freeze([
-  ...BESTIARY_XP_CATEGORIES.map((category) => category.toUpperCase()),
-  'DWEMER',
+  ...BUILT_IN_ENEMY_FAMILIES,
   'UNRESOLVED'
 ]);
+
+export function isExactXpCategory(value) {
+  return typeof value === 'string' && value.length <= 96 && XP_CATEGORY_PATTERN.test(value);
+}
+
+function isExactEnemyFamily(value) {
+  return typeof value === 'string' && /^[A-Z0-9]+(?:_[A-Z0-9]+)*$/.test(value) && value !== 'UNRESOLVED';
+}
+
+export function createXpCategoryContract(input = {}) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw new TypeError('XP category contract must be an object');
+  const { categories = [], familyMappings = null, source = null, balanceVersion = null } = input;
+  const suppliedVersion = input?.contractVersion;
+  if (suppliedVersion !== undefined && suppliedVersion !== XP_CATEGORY_CONTRACT_VERSION) throw new TypeError('unsupported XP category contractVersion');
+  if (!Array.isArray(categories)) throw new TypeError('XP category contract categories must be an array');
+  const uniqueCategories = [...new Set(categories)];
+  if (uniqueCategories.some((category) => !isExactXpCategory(category))) throw new TypeError('XP category contract contains an invalid category');
+  const categorySet = new Set(uniqueCategories);
+  const mappings = familyMappings ?? Object.fromEntries(uniqueCategories.map((category) => [category.toUpperCase(), category]));
+  if (!mappings || typeof mappings !== 'object' || Array.isArray(mappings)) throw new TypeError('XP category familyMappings must be an object');
+  const normalizedMappings = {};
+  for (const [family, category] of Object.entries(mappings)) {
+    if (!isExactEnemyFamily(family)) throw new TypeError(`invalid enemy family mapping: ${family}`);
+    if (!categorySet.has(category)) throw new TypeError(`enemy family ${family} maps outside the configured XP catalog`);
+    normalizedMappings[family] = category;
+  }
+  return Object.freeze({
+    contractVersion: XP_CATEGORY_CONTRACT_VERSION,
+    categories: Object.freeze(uniqueCategories),
+    familyMappings: Object.freeze(normalizedMappings),
+    source,
+    balanceVersion
+  });
+}
+
+export const DEFAULT_XP_CATEGORY_CONTRACT = createXpCategoryContract({
+  categories: BESTIARY_XP_CATEGORIES,
+  source: 'AetheriusEnemySystem defaults'
+});
 
 export const PROGRESSION_SOURCE_TYPES = Object.freeze([
   'DUNGEON', 'WORLD_ENCOUNTER', 'ROAD_ENCOUNTER', 'CAMP', 'PATROL',
@@ -80,7 +127,7 @@ export function validateClassLevel(level) {
 }
 
 export function validateXpCategory(category) {
-  return category === null || BESTIARY_XP_CATEGORIES.includes(category);
+  return category === null || isExactXpCategory(category);
 }
 
 export function validateEnemyDescriptor(value) {
@@ -93,7 +140,7 @@ export function validateEnemyDescriptor(value) {
   if (typeof value.spawnRole !== 'string' || !value.spawnRole || value.spawnRole === 'UNRESOLVED') errors.push('spawnRole must be resolved');
   if (!validateCombatLevel(value.combatLevel)) errors.push('combatLevel must be 1..100');
   if (typeof value.xpEligible !== 'boolean') errors.push('xpEligible must be boolean');
-  if (!validateXpCategory(value.xpCategory)) errors.push('xpCategory is not in the external bestiary contract');
+  if (!validateXpCategory(value.xpCategory)) errors.push('xpCategory must be an exact configured snake_case category');
   if (value.xpEligible && (value.xpCategory === null || value.xpCategory === 'UNRESOLVED')) errors.push('eligible enemy must have an exact xpCategory');
   if (typeof value.sourcePlugin !== 'string' || !value.sourcePlugin) errors.push('sourcePlugin is required');
   if (typeof value.winningOverridePlugin !== 'string' || !value.winningOverridePlugin) errors.push('winningOverridePlugin is required');

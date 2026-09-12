@@ -4,7 +4,7 @@ Sistema server-authoritative de inimigos, encontros e dungeons para servidores S
 
 O projeto descobre conteúdo vanilla, DLC, Creation Club e mods diretamente da load order ativa do Mod Organizer 2. Ele não depende de índices fixos: cada registro é persistido como `plugin de origem + FormID local`, e o FormID de runtime é resolvido pelo host somente no momento de uso. Assim, alterar a posição de um plugin não invalida as identidades salvas.
 
-> Estado: camada de domínio e integração em desenvolvimento. Os contratos, a descoberta, o resolvedor de spawn e os testes estão implementados; a conexão com o servidor definitivo e a validação multiplayer serão realizadas em um projeto de integração futuro.
+> Estado: camada de domínio e integração em desenvolvimento. Os contratos, a descoberta, o resolvedor de spawn e a integração de categorias com o AetheriusLevelingSystem estão implementados; a conexão com o servidor definitivo e a validação multiplayer serão realizadas no projeto de integração.
 
 ## Como o sistema funciona
 
@@ -14,7 +14,7 @@ O projeto descobre conteúdo vanilla, DLC, Creation Club e mods diretamente da l
 4. Cada dungeon recebe uma faixa de dificuldade, níveis de inimigos e contexto recomendado de Class Level.
 5. O servidor escolhe spawns de forma determinística por identidade, geração e pesos derivados das listas originais.
 6. Reconexões reutilizam a decisão persistida. Um novo sorteio ocorre somente em uma nova geração/reset.
-7. Eventos de morte são idempotentes e entregam contexto ao futuro sistema de leveling, sem calcular XP dentro deste projeto.
+7. Eventos de morte são idempotentes e entregam contexto ao AetheriusLevelingSystem, sem calcular XP dentro deste projeto.
 
 ```text
 MO2 ativo
@@ -69,7 +69,7 @@ O adaptador do host recebe essa identidade e resolve o FormID de runtime contra 
 - A resolução permanece estável durante a mesma geração e após reconexões.
 - NPCs únicos podem ser tratados por políticas explícitas de boss.
 
-## Integrações futuras
+## Integrações
 
 O projeto fornece portas neutras, sem importar símbolos privados de uma implementação específica do SkyMP:
 
@@ -81,6 +81,8 @@ O projeto fornece portas neutras, sem importar símbolos privados de uma impleme
 - delegação para o futuro AetheriusLootSystem.
 
 Até o sistema de loot dedicado existir, a composição original é restaurada somente em uma nova geração/reset da dungeon. Não há restauração adicional dentro da mesma geração.
+
+O Leveling fornece ao `EnemyScanner` um contrato gerado de seus perfis JSON ativos. Assim, as categorias aprovadas e famílias adicionadas por mods entram sem alterar uma enumeração no código. O Enemy System valida apenas a chave exata em `snake_case`; o Leveling continua sendo a única autoridade dos valores de XP. Ice Wraith e Thalmor são categorias MEDIUM aprovadas e possuem evidências semânticas verificadas na load order real.
 
 ## Estrutura
 

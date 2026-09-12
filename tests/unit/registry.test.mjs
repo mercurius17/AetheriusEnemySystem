@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { EnemyScanner, WinningOverrideResolver } from '../../src/index.mjs';
+import { BESTIARY_XP_CATEGORIES, EnemyScanner, WinningOverrideResolver, createXpCategoryContract } from '../../src/index.mjs';
 
 function scan(records, options = {}) {
   return new EnemyScanner({ winningOverrideResolver: new WinningOverrideResolver(records), ...options }).scan(records);
@@ -31,4 +31,31 @@ test('an authority plugin scope alone never classifies every touched NPC', () =>
   const registry = scan(records, { authorityByPlugin: new Map([['Better Vampire NPCs.esp', { families: ['VAMPIRE'] }]]) });
   assert.equal(registry.get(records[0].identity).enemyFamily, 'UNRESOLVED');
   assert.equal(registry.get(records[0].identity).xpEligible, false);
+});
+
+test('approved Leveling families including Ice Wraith and Thalmor are emitted', () => {
+  const records = [
+    { identity: 'Dragonborn.esm|000001', plugin: 'Dragonborn.esm', type: 'NPC_', levelSemantics: 'FIXED', sourceLevel: 20, semanticTags: ['CULTIST'] },
+    { identity: 'Dawnguard.esm|000002', plugin: 'Dawnguard.esm', type: 'NPC_', levelSemantics: 'FIXED', sourceLevel: 20, semanticTags: ['WRATHMAN'] },
+    { identity: 'Skyrim.esm|000003', plugin: 'Skyrim.esm', type: 'NPC_', levelSemantics: 'FIXED', sourceLevel: 20, semanticTags: ['THALMOR'] },
+    { identity: 'Skyrim.esm|000004', plugin: 'Skyrim.esm', type: 'NPC_', levelSemantics: 'FIXED', sourceLevel: 20, semanticTags: ['ICE_WRAITH'] }
+  ];
+  const registry = scan(records);
+  assert.ok(BESTIARY_XP_CATEGORIES.includes('cultist'));
+  assert.ok(BESTIARY_XP_CATEGORIES.includes('wrathman'));
+  assert.equal(registry.get(records[0].identity).xpCategory, 'cultist');
+  assert.equal(registry.get(records[1].identity).xpCategory, 'wrathman');
+  assert.equal(registry.get(records[2].identity).enemyFamily, 'THALMOR');
+  assert.equal(registry.get(records[2].identity).xpCategory, 'thalmor');
+  assert.equal(registry.get(records[3].identity).xpCategory, 'ice_wraith');
+});
+
+test('a mod-added family is discovered through an injected Leveling category contract', () => {
+  const records = [{ identity: 'NewCreatures.esp|000001', plugin: 'NewCreatures.esp', type: 'NPC_', levelSemantics: 'FIXED', sourceLevel: 30, semanticTags: ['CLOCKWORK_GOLEM'] }];
+  const xpCategoryContract = createXpCategoryContract({ categories: ['clockwork_golem'] });
+  const registry = scan(records, { xpCategoryContract });
+  const enemy = registry.get(records[0].identity);
+  assert.equal(enemy.enemyFamily, 'CLOCKWORK_GOLEM');
+  assert.equal(enemy.xpCategory, 'clockwork_golem');
+  assert.equal(enemy.xpEligible, true);
 });

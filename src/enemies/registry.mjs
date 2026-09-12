@@ -1,22 +1,16 @@
 import {
-  BESTIARY_XP_CATEGORIES,
+  DEFAULT_XP_CATEGORY_CONTRACT,
   ENEMY_FAMILIES,
+  createXpCategoryContract,
   validateCombatLevel,
   validateEnemyDescriptor
 } from '../contracts/types.mjs';
-
-const FAMILY_TO_XP = Object.freeze({
-  ...Object.fromEntries(BESTIARY_XP_CATEGORIES.map((category) => [category.toUpperCase(), category])),
-  // DWEMER is deliberately not mapped: spiders, spheres, ballistae and
-  // centurions have distinct external bestiary keys.
-  DWEMER: null
-});
 
 function unique(values) {
   return [...new Set((values ?? []).filter(Boolean))];
 }
 
-export function classifyEnemy(record, { authorityFamilies = [], manualClassification = null } = {}) {
+export function classifyEnemy(record, { authorityFamilies = [], manualClassification = null, knownFamilies = ENEMY_FAMILIES } = {}) {
   const evidence = [];
   if (manualClassification) return { family: manualClassification.family, status: 'RESOLVED', evidence: ['manual override'], archetype: manualClassification.archetype ?? null, spawnRole: manualClassification.spawnRole ?? 'GENERIC' };
   if (record.dragonPriest === true) evidence.push('record.dragonPriest');
@@ -25,19 +19,18 @@ export function classifyEnemy(record, { authorityFamilies = [], manualClassifica
     ...(record.factions ?? []).map((value) => String(value).toUpperCase()),
     ...(record.semanticTags ?? []).map((value) => String(value).toUpperCase())
   ]);
-  for (const family of ENEMY_FAMILIES) if (tokens.has(family)) evidence.push(`tag:${family}`);
+  for (const family of knownFamilies) if (tokens.has(family)) evidence.push(`tag:${family}`);
   for (const family of authorityFamilies) evidence.push(`authority-scope:${family}`);
   if (evidence.includes('record.dragonPriest')) return { family: 'DRAGON_PRIEST', status: 'RESOLVED', evidence, archetype: record.archetype ?? null, spawnRole: record.spawnRole ?? 'BOSS' };
   // Authority determines which mod wins for a family; it is not evidence that
   // every NPC touched by that plugin belongs to that family.
-  const candidates = unique([...tokens].filter((token) => ENEMY_FAMILIES.includes(token)));
+  const candidates = unique([...tokens].filter((token) => knownFamilies.includes(token)));
   if (candidates.length === 1) return { family: candidates[0], status: 'RESOLVED', evidence, archetype: record.archetype ?? null, spawnRole: record.spawnRole ?? 'GENERIC' };
   return { family: 'UNRESOLVED', status: 'UNRESOLVED', evidence, archetype: null, spawnRole: record.spawnRole ?? 'UNRESOLVED' };
 }
 
-export function resolveXpCategory(family) {
-  const category = FAMILY_TO_XP[family] ?? null;
-  return category && BESTIARY_XP_CATEGORIES.includes(category) ? category : null;
+export function resolveXpCategory(family, xpCategoryContract = DEFAULT_XP_CATEGORY_CONTRACT) {
+  return xpCategoryContract?.familyMappings?.[family] ?? null;
 }
 
 export function resolveCombatLevel(record, profile = null) {
@@ -80,10 +73,17 @@ export class EnemyRegistry {
 }
 
 export class EnemyScanner {
-  constructor({ authorityByPlugin = new Map(), manualOverrides = new Map(), winningOverrideResolver = null } = {}) {
+  constructor({ authorityByPlugin = new Map(), manualOverrides = new Map(), winningOverrideResolver = null, xpCategoryContract = DEFAULT_XP_CATEGORY_CONTRACT } = {}) {
     this.authorityByPlugin = authorityByPlugin instanceof Map ? authorityByPlugin : new Map(Object.entries(authorityByPlugin));
     this.manualOverrides = manualOverrides instanceof Map ? manualOverrides : new Map(Object.entries(manualOverrides));
     this.winningOverrideResolver = winningOverrideResolver;
+    this.xpCategoryContract = xpCategoryContract?.contractVersion
+      ? createXpCategoryContract(xpCategoryContract)
+      : createXpCategoryContract(xpCategoryContract ?? {});
+    this.knownFamilies = Object.freeze([...new Set([
+      ...ENEMY_FAMILIES,
+      ...Object.keys(this.xpCategoryContract.familyMappings)
+    ])]);
   }
 
   scan(records = [], { encounterProfiles = new Map() } = {}) {
@@ -94,7 +94,8 @@ export class EnemyScanner {
       const authority = this.authorityByPlugin.get(record.plugin) ?? { authorityId: null, families: [] };
       const classification = classifyEnemy(record, {
         authorityFamilies: authority.families ?? [],
-        manualClassification: this.manualOverrides.get(identity) ?? null
+        manualClassification: this.manualOverrides.get(identity) ?? null,
+        knownFamilies: this.knownFamilies
       });
       const exclusions = {
         quest: Boolean(record.quest || record.questAliasCritical),
@@ -105,7 +106,7 @@ export class EnemyScanner {
       };
       const profile = encounterProfiles.get(record.encounterId) ?? null;
       const levelResult = resolveCombatLevel({ ...record, family: classification.family }, profile);
-      const xpCategory = resolveXpCategory(classification.family);
+      const xpCategory = resolveXpCategory(classification.family, this.xpCategoryContract);
       const xpEligible = classification.status === 'RESOLVED' && Boolean(xpCategory) && Object.values(exclusions).every((value) => !value) && validateCombatLevel(levelResult.level);
       const winning = this.winningOverrideResolver?.resolve(identity);
       enemies.push({
